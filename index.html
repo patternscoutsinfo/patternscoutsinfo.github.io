@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V68SDV8WXV"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-V68SDV8WXV');
+</script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Crow — Excel Analysis Tools for Windows | Pattern Scouts</title>
@@ -136,6 +144,32 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.08; letter-spacing:
 .step h3 { font-size: 17px; margin-bottom: 8px; }
 .step p { font-size: 14px; color: var(--ink-soft); line-height: 1.65; }
 @media (max-width: 780px) { .steps { grid-template-columns: 1fr; } .step { border-right: none; border-bottom: 1px solid var(--line); } .step:last-child { border-bottom: none; } }
+
+/* ── CUSTOM SECTION ──────────────────────────────────────────────── */
+.custom-section { background: var(--ink); padding: 88px 0; }
+.custom-section h2 { color: #fff; font-size: clamp(28px, 4vw, 44px); margin-top: 10px; }
+.custom-section .section__head p { color: rgba(255,255,255,.5); }
+.custom-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 48px; }
+@media(max-width:700px){ .custom-grid { grid-template-columns: 1fr; } }
+.custom-left { }
+.custom-steps-list { list-style: none; margin-top: 24px; }
+.custom-steps-list li { display: flex; gap: 16px; padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,.08); align-items: flex-start; }
+.custom-steps-list li:last-child { border-bottom: none; }
+.custom-step-num { font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: .1em; flex: none; padding-top: 3px; width: 28px; }
+.custom-step-text h4 { font-family: var(--display); font-size: 16px; color: #fff; margin-bottom: 4px; }
+.custom-step-text p { font-size: 13px; color: rgba(255,255,255,.45); line-height: 1.6; margin: 0; }
+.custom-right { background: #111d28; border: 1px solid rgba(255,255,255,.08); padding: 28px; }
+.custom-right-head { font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 18px; }
+.example-request { background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.08); padding: 18px; margin-bottom: 12px; border-radius: 2px; }
+.example-request-tag { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.3); letter-spacing: .1em; margin-bottom: 6px; }
+.example-request-title { font-family: var(--display); font-size: 15px; color: #fff; font-weight: 600; margin-bottom: 6px; }
+.example-request-steps { font-size: 12px; color: rgba(255,255,255,.4); line-height: 1.7; }
+.custom-cta { margin-top: 24px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.custom-cta-note { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.25); }
+.usp-bar { background: var(--green); padding: 20px 0; }
+.usp-bar__inner { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+.usp-bar__text { font-family: var(--display); font-size: 18px; font-weight: 600; color: #fff; text-align: center; }
+.usp-bar__text em { font-style: normal; color: #6EE7B7; }
 
 /* ── TOOLS ───────────────────────────────────────────────────────── */
 .tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
@@ -315,6 +349,31 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
     <a href="#download" class="btn btn--green nav__cta">Download</a>
   </div>
 </nav>
+
+<!-- VISITOR BAR -->
+<div class="visitor-bar" id="visitor-bar" style="display:none">
+  <div class="wrap visitor-bar__inner">
+    <div class="visitor-stat">
+      <div class="visitor-stat__num" id="vs-today">—</div>
+      <div class="visitor-stat__label">Visitors<br>today</div>
+    </div>
+    <div class="visitor-divider"></div>
+    <div class="visitor-stat">
+      <div class="visitor-stat__num" id="vs-month">—</div>
+      <div class="visitor-stat__label">This<br>month</div>
+    </div>
+    <div class="visitor-divider"></div>
+    <div class="visitor-stat">
+      <div class="visitor-stat__num" id="vs-year">—</div>
+      <div class="visitor-stat__label">This<br>year</div>
+    </div>
+    <div class="visitor-divider"></div>
+    <div class="visitor-live">
+      <span class="visitor-live-dot"></span>
+      <span class="visitor-live-text">Live tracking active</span>
+    </div>
+  </div>
+</div>
 
 <!-- HERO -->
 <section class="hero">
@@ -497,6 +556,99 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
           <div class="ba__row"><span>1</span><span class="good">Shah Traders</span><span class="good">INV-0921</span><span class="good">12,400.00</span></div>
           <div class="ba__row"><span>2</span><span class="flag">Shah Traders</span><span class="flag">INV-0921</span><span class="flag">⚠ duplicate</span></div>
           <div class="ba__row"><span>3</span><span class="flag">Shah Traders</span><span class="flag">INV-0921</span><span class="flag">⚠ duplicate</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- USP BAR -->
+<div class="usp-bar">
+  <div class="wrap usp-bar__inner">
+    <div class="usp-bar__text">
+      Don't see what you need? <em>We'll build it for you.</em> Every Crow tool started as a user request.
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM TOOLS -->
+<section class="custom-section" id="custom">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow eyebrow--light">Built to your workflow</p>
+      <h2>Your process. Your tool.</h2>
+      <p>The 16 tools in Crow today exist because users described the jobs they were doing by hand. If your work isn't covered — describe it, and we build it. That's the deal.</p>
+    </div>
+
+    <div class="custom-grid">
+      <div class="custom-left">
+        <ul class="custom-steps-list">
+          <li>
+            <span class="custom-step-num">01</span>
+            <div class="custom-step-text">
+              <h4>Open Crow and click "Request a tool"</h4>
+              <p>A simple form appears. No email to write, no attachment to send.</p>
+            </div>
+          </li>
+          <li>
+            <span class="custom-step-num">02</span>
+            <div class="custom-step-text">
+              <h4>Describe the job in plain words</h4>
+              <p>Write it the way you'd explain it to a new colleague. Step 1, Step 2, Step 3. Give one example file or scenario if you can.</p>
+            </div>
+          </li>
+          <li>
+            <span class="custom-step-num">03</span>
+            <div class="custom-step-text">
+              <h4>We reply inside the same window</h4>
+              <p>You can see our reply, ask questions, and refine the requirement — all from inside Crow. No email thread to manage.</p>
+            </div>
+          </li>
+          <li>
+            <span class="custom-step-num">04</span>
+            <div class="custom-step-text">
+              <h4>The tool lands in Crow automatically</h4>
+              <p>Once built, it appears in your tool list on the next launch. No download, no reinstall, no action needed from you.</p>
+            </div>
+          </li>
+        </ul>
+        <div class="custom-cta">
+          <a href="#download" class="btn btn--green">Download Crow to request a tool</a>
+          <span class="custom-cta-note">Included in every plan</span>
+        </div>
+      </div>
+
+      <div class="custom-right">
+        <div class="custom-right-head">Real requests we've received</div>
+
+        <div class="example-request">
+          <div class="example-request-tag">VENDOR · General</div>
+          <div class="example-request-title">Duplicate invoice finder</div>
+          <div class="example-request-steps">
+            1. Read vendor name, invoice number and amount from each row<br>
+            2. Flag any row where the same invoice appears more than once<br>
+            3. Mark rows where the amount differs but vendor + invoice match
+          </div>
+        </div>
+
+        <div class="example-request">
+          <div class="example-request-tag">HR · Operations</div>
+          <div class="example-request-title">Monthly attendance summary</div>
+          <div class="example-request-steps">
+            1. Read the muster sheet — one row per employee per day<br>
+            2. Count present, absent, half-day and late for each person<br>
+            3. Output one row per employee with all counts for the month
+          </div>
+        </div>
+
+        <div class="example-request">
+          <div class="example-request-tag">General</div>
+          <div class="example-request-title">Merge and deduplicate master files</div>
+          <div class="example-request-steps">
+            1. Open all Excel files in a selected folder<br>
+            2. Stack them into one sheet<br>
+            3. Remove rows where the ID column is an exact duplicate
+          </div>
         </div>
       </div>
     </div>
@@ -835,6 +987,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadPricing();
   await loadDownload();
   updateHeroBtn();
+  initVisitorBar();
 });
 
 // ── CONTACT MODAL ─────────────────────────────────────────────────
