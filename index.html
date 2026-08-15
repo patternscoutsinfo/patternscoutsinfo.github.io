@@ -408,11 +408,11 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
         <div class="hero__note">Trial · <span id="trial-note-price">₹10</span> &nbsp;·&nbsp; Installs in under a minute</div>
         <div class="hero__stats" style="margin-top:40px">
           <div>
-            <div class="hero__stat-num">16+</div>
+            <div class="hero__stat-num" id="stat-tools">16+</div>
             <div class="hero__stat-label">Ready-made tools</div>
           </div>
           <div>
-            <div class="hero__stat-num">4</div>
+            <div class="hero__stat-num" id="stat-cats">4</div>
             <div class="hero__stat-label">Tool categories</div>
           </div>
           <div>
@@ -830,6 +830,10 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
         <p>Yes — that is what the Request a tool button is for inside Crow. Describe the job you keep doing by hand, step by step, and it comes straight to us. We build the tools users actually need.</p>
       </details>
       <details>
+        <summary>Windows says "Unknown publisher" when I download. Is it safe?</summary>
+        <p>Yes, completely safe. Windows shows this warning for any new software that has not yet built up a download history with Microsoft — it is not a sign of a virus or problem. Click <strong>More info</strong> and then <strong>Run anyway</strong> to install. Once Crow is installed it updates itself silently in the background and you will never see this screen again.</p>
+      </details>
+      <details>
         <summary>Which versions of Windows does it run on?</summary>
         <p>Windows 10 and Windows 11, 64-bit.</p>
       </details>
@@ -845,6 +849,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
         <h2>Ready to stop doing this by hand?</h2>
         <p>Download CrowSetup.exe, pay <span id="trial-cta-price">₹10</span>, run it against a file you already know the answer to. If it doesn't earn its place, you've spent <span id="trial-cta-price2">₹10</span>.</p>
         <div class="download-bar__note" style="margin-top:14px">Windows 10 &amp; 11 · 64-bit · No Excel needed · No admin password</div>
+        <div class="download-bar__note" style="margin-top:6px">Windows may show a safety prompt on first run — click <strong style="color:rgba(255,255,255,.5)">More info → Run anyway</strong>. This is normal for new software.</div>
       </div>
       <div class="download-bar__actions">
         <a href="#" id="download-btn" class="btn btn--primary" style="font-size:16px;padding:16px 32px">
@@ -1000,7 +1005,27 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadDownload();
   updateHeroBtn();
   initVisitorBar();
+  loadToolStats();
 });
+
+async function loadToolStats() {
+  try {
+    const res = await fetch(SUPA_URL + "/rest/v1/crow_tools?select=grouping&status=eq.live", {
+      headers: { "apikey": SUPA_ANON, "Authorization": "Bearer " + SUPA_ANON }
+    });
+    if (!res.ok) return;
+    const tools = await res.json();
+    if (!tools || !tools.length) return;
+
+    const count = tools.length;
+    const cats  = new Set(tools.map(t => t.grouping).filter(Boolean)).size;
+
+    const te = document.getElementById("stat-tools");
+    const ce = document.getElementById("stat-cats");
+    if (te) te.textContent = count + "+";
+    if (ce && cats > 0) ce.textContent = cats;
+  } catch(e) {}
+}
 
 // ── CONTACT MODAL ─────────────────────────────────────────────────
 async function initVisitorBar() {
