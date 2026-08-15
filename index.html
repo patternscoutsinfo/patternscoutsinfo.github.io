@@ -168,8 +168,11 @@ h1, h2, h3, h4 { font-family: var(--display); line-height: 1.08; letter-spacing:
 .plan--featured .plan__label { color: rgba(255,255,255,.55); }
 .plan__price { font-family: var(--display); font-size: 48px; font-weight: 700; line-height: 1; margin-bottom: 4px; letter-spacing: -.03em; }
 .plan--featured .plan__price { color: #fff; }
-.plan__strike { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); text-decoration: line-through; margin-bottom: 6px; }
-.plan--featured .plan__strike { color: rgba(255,255,255,.45); }
+.plan__strike { font-size: 13px; color: var(--ink-soft); margin-bottom: 6px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.plan--featured .plan__strike { color: rgba(255,255,255,.55); }
+.plan__strike-was { text-decoration: line-through; opacity: .6; }
+.plan__strike-save { font-family: var(--mono); font-size: 10px; background: #FEF3C7; color: #92400E; padding: 2px 7px; border-radius: 100px; font-weight: 600; letter-spacing: .04em; }
+.plan--featured .plan__strike-save { background: rgba(255,255,255,.15); color: rgba(255,255,255,.9); }
 .plan__period { font-size: 13px; color: var(--ink-soft); margin-bottom: 24px; }
 .plan--featured .plan__period { color: rgba(255,255,255,.65); }
 .plan__loading { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); }
@@ -538,7 +541,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
       </div>
       <div class="plan plan--featured">
         <div class="plan__label">Monthly</div>
-        <div class="plan__price price-val loading" id="price-monthly">₹200</div>
+        <div class="plan__price price-val loading" id="price-monthly">₹499</div>
         <div class="plan__strike" id="strike-monthly"></div>
         <div class="plan__period">Per month, billed monthly</div>
         <ul>
@@ -551,7 +554,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
       </div>
       <div class="plan">
         <div class="plan__label">Yearly</div>
-        <div class="plan__price price-val loading" id="price-yearly">₹1,500</div>
+        <div class="plan__price price-val loading" id="price-yearly">₹4,999</div>
         <div class="plan__strike" id="strike-yearly"></div>
         <div class="plan__period">Per year — works out cheaper monthly</div>
         <ul>
@@ -686,6 +689,7 @@ async function loadPricing() {
 
     const fmt = (v) => "₹" + Number(v).toLocaleString("en-IN");
 
+    // Update prices
     const trial   = document.getElementById("price-trial");
     const monthly = document.getElementById("price-monthly");
     const yearly  = document.getElementById("price-yearly");
@@ -696,9 +700,19 @@ async function loadPricing() {
     if (monthly && p.monthly != null) { monthly.textContent = fmt(p.monthly); monthly.classList.remove("loading"); }
     if (yearly  && p.yearly  != null) { yearly.textContent  = fmt(p.yearly);  yearly.classList.remove("loading"); }
 
-    // Strike-through prices from Supabase settings (price_monthly_strike etc)
-    // These come through as separate crow_setting calls; we try reading them
-    // from a second call if available, otherwise leave blank.
+    // Strike-through + savings badge
+    function renderStrike(el, strikeVal, actualVal) {
+      if (!el || !strikeVal || Number(strikeVal) <= 0) return;
+      const strike = Number(strikeVal);
+      const actual = Number(actualVal) || 0;
+      const saving = actual > 0 ? Math.round((1 - actual/strike)*100) : 0;
+      el.innerHTML =
+        '<span class="plan__strike-was">' + fmt(strike) + '</span>' +
+        (saving > 0 ? '<span class="plan__strike-save">Save ' + saving + '%</span>' : '');
+    }
+    renderStrike(strikeM, p.monthly_strike, p.monthly);
+    renderStrike(strikeY, p.yearly_strike,  p.yearly);
+
   } catch (e) {
     // Supabase unreachable — hardcoded fallbacks already visible in HTML
     document.querySelectorAll(".price-val").forEach(el => el.classList.remove("loading"));
