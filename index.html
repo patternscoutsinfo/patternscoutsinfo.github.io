@@ -334,7 +334,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
           </a>
           <a href="#pricing" class="btn btn--ghost">See pricing</a>
         </div>
-        <div class="hero__note">Trial · ₹1 &nbsp;·&nbsp; Installs in under a minute</div>
+        <div class="hero__note">Trial · <span id="trial-note-price">₹10</span> &nbsp;·&nbsp; Installs in under a minute</div>
         <div class="hero__stats" style="margin-top:40px">
           <div>
             <div class="hero__stat-num">16+</div>
@@ -582,7 +582,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
   <div class="wrap">
     <div class="section__head">
       <p class="eyebrow">Pricing</p>
-      <h2>Try it for one rupee.</h2>
+      <h2>Try it for <span id="trial-heading-price">₹10</span>.</h2>
       <p>One licence covers one computer. Prices are in Indian rupees and include everything — every tool, every update, every category.</p>
     </div>
     <div class="pricing-grid" id="pricing-grid">
@@ -679,7 +679,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
     <div class="download-bar__inner">
       <div>
         <h2>Ready to stop doing this by hand?</h2>
-        <p>Download CrowSetup.exe, pay ₹1, run it against a file you already know the answer to. If it doesn't earn its place, you've spent one rupee.</p>
+        <p>Download CrowSetup.exe, pay <span id="trial-cta-price">₹10</span>, run it against a file you already know the answer to. If it doesn't earn its place, you've spent <span id="trial-cta-price2">₹10</span>.</p>
         <div class="download-bar__note" style="margin-top:14px">Windows 10 &amp; 11 · 64-bit · No Excel needed · No admin password</div>
       </div>
       <div class="download-bar__actions">
@@ -755,7 +755,14 @@ async function loadPricing() {
     const strikeM = document.getElementById("strike-monthly");
     const strikeY = document.getElementById("strike-yearly");
 
-    if (trial   && p.trial   != null) { trial.textContent   = fmt(p.trial);   trial.classList.remove("loading"); }
+    if (trial   && p.trial   != null) {
+      trial.textContent = fmt(p.trial);
+      trial.classList.remove("loading");
+      // Update all other places that show the trial price
+      const t = fmt(p.trial);
+      ["trial-note-price","trial-heading-price","trial-cta-price","trial-cta-price2"]
+        .forEach(id => { const el = document.getElementById(id); if(el) el.textContent = t; });
+    }
     if (monthly && p.monthly != null) { monthly.textContent = fmt(p.monthly); monthly.classList.remove("loading"); }
     if (yearly  && p.yearly  != null) { yearly.textContent  = fmt(p.yearly);  yearly.classList.remove("loading"); }
 
