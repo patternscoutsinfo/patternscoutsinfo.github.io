@@ -991,6 +991,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 });
 
 // ── CONTACT MODAL ─────────────────────────────────────────────────
+async function initVisitorBar() {
+  try {
+    await fetch(SUPA_URL + '/rest/v1/rpc/crow_record_visit', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + SUPA_ANON,
+                 'Content-Type': 'application/json' },
+      body: JSON.stringify({ p_page: window.location.pathname })
+    });
+  } catch(e) {}
+  try {
+    const res = await fetch(SUPA_URL + '/rest/v1/rpc/crow_visit_counts', {
+      method: 'POST',
+      headers: { 'apikey': SUPA_ANON, 'Authorization': 'Bearer ' + SUPA_ANON,
+                 'Content-Type': 'application/json' },
+      body: '{}'
+    });
+    if (!res.ok) return;
+    const d = await res.json();
+    const fmt = n => n >= 1000 ? (n/1000).toFixed(1)+'k' : String(n||0);
+    const el  = id => document.getElementById(id);
+    if(el('vs-today')) el('vs-today').textContent = fmt(d.today);
+    if(el('vs-month')) el('vs-month').textContent = fmt(d.month);
+    if(el('vs-year'))  el('vs-year').textContent  = fmt(d.year);
+    const bar = document.getElementById('visitor-bar');
+    if(bar) bar.style.display = '';
+  } catch(e) {}
+}
+
 function openModal() {
   document.getElementById("contact-modal").classList.add("open");
   document.body.style.overflow = "hidden";
