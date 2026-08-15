@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Crow — Excel Analysis Tools for Windows | Pattern Scouts</title>
+<meta name="description" content="Crow is a Windows desktop app by Pattern Scouts. Open your Excel file, pick a tool, get the answer instantly. No macros, no formulas, no uploads.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── TOKENS ─────────────────────────────────────────────────────── */
+:root {
+  --green:      #17624F;
+  --green-dark: #0E3C30;
+  --green-mid:  #1E7A62;
+  --green-lo:   #D7E8E1;
+  --green-pale: #EEF5F2;
+  --ink:        #0E141B;
+  --ink-soft:   #56636E;
+  --paper:      #F0F2F0;
+  --card:       #FFFFFF;
+  --line:       #D3DAD6;
+  --rust:       #A8431E;
+  --mono:       'IBM Plex Mono', monospace;
+  --sans:       'IBM Plex Sans', system-ui, sans-serif;
+  --display:    'Space Grotesk', system-ui, sans-serif;
+}
+
+/* ── RESET ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; font-size: 16px; }
+body { background: var(--paper); color: var(--ink); font-family: var(--sans); line-height: 1.65; -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+a { color: var(--green); }
+button { cursor: pointer; border: none; font-family: var(--sans); }
+@media (prefers-reduced-motion: reduce) { *, html { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+/* ── LAYOUT ──────────────────────────────────────────────────────── */
+.wrap { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+.wrap--narrow { max-width: 760px; margin: 0 auto; padding: 0 28px; }
+
+/* ── TYPOGRAPHY ──────────────────────────────────────────────────── */
+h1, h2, h3, h4 { font-family: var(--display); line-height: 1.08; letter-spacing: -.02em; }
+.eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--ink-soft); }
+.eyebrow--light { color: rgba(255,255,255,.55); }
+
+/* ── BUTTONS ─────────────────────────────────────────────────────── */
+.btn { display: inline-flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 600; font-size: 15px; padding: 14px 26px; text-decoration: none; transition: background .15s, transform .1s; border-radius: 2px; }
+.btn:active { transform: translateY(1px); }
+.btn--primary { background: var(--card); color: var(--green-dark); }
+.btn--primary:hover { background: var(--green-lo); }
+.btn--green { background: var(--green); color: #fff; }
+.btn--green:hover { background: var(--green-mid); }
+.btn--ghost { background: transparent; color: var(--card); border: 1.5px solid rgba(255,255,255,.4); }
+.btn--ghost:hover { background: rgba(255,255,255,.08); border-color: rgba(255,255,255,.7); }
+.btn--ink { background: var(--ink); color: #fff; }
+.btn--ink:hover { background: #1e2835; }
+
+/* ── NAV ─────────────────────────────────────────────────────────── */
+.nav { position: sticky; top: 0; z-index: 100; background: rgba(14,20,27,.92); backdrop-filter: blur(12px); border-bottom: 1px solid rgba(255,255,255,.07); }
+.nav__inner { display: flex; align-items: center; justify-content: space-between; height: 62px; }
+.nav__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.nav__logo-mark { width: 32px; height: 32px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+.nav__logo-mark svg { width: 18px; height: 18px; fill: #fff; }
+.nav__logo-text { font-family: var(--display); font-weight: 700; font-size: 19px; color: #fff; letter-spacing: -.02em; }
+.nav__logo-sub { font-family: var(--mono); font-size: 10px; color: rgba(255,255,255,.4); letter-spacing: .1em; text-transform: uppercase; }
+.nav__links { display: flex; align-items: center; gap: 28px; }
+.nav__links a { font-size: 14px; color: rgba(255,255,255,.65); text-decoration: none; transition: color .15s; }
+.nav__links a:hover { color: #fff; }
+.nav__cta { font-size: 14px; font-family: var(--display); font-weight: 600; }
+@media (max-width: 700px) { .nav__links { display: none; } }
+
+/* ── HERO ─────────────────────────────────────────────────────────── */
+.hero { background: linear-gradient(160deg, var(--green-dark) 0%, #0a2a1f 55%, #071a14 100%); padding: 100px 0 80px; overflow: hidden; position: relative; }
+.hero::before { content: ''; position: absolute; inset: 0; background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E"); }
+.hero__inner { display: grid; grid-template-columns: 1fr 1fr; gap: 64px; align-items: center; position: relative; }
+.hero__tag { display: inline-flex; align-items: center; gap: 8px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.12); border-radius: 100px; padding: 5px 14px 5px 8px; margin-bottom: 24px; }
+.hero__tag-dot { width: 7px; height: 7px; background: #4ADE80; border-radius: 50%; animation: pulse 2s infinite; }
+@keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+.hero__tag span { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.7); letter-spacing: .1em; }
+.hero h1 { font-size: clamp(38px, 5vw, 62px); font-weight: 700; color: #fff; margin-bottom: 22px; }
+.hero h1 em { font-style: normal; color: #6EE7B7; }
+.hero__sub { font-size: 18px; color: rgba(255,255,255,.65); max-width: 46ch; margin-bottom: 36px; line-height: 1.7; }
+.hero__actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 40px; }
+.hero__note { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.35); letter-spacing: .06em; }
+.hero__stats { display: flex; gap: 36px; flex-wrap: wrap; }
+.hero__stat-num { font-family: var(--display); font-size: 28px; font-weight: 700; color: #fff; }
+.hero__stat-label { font-size: 12px; color: rgba(255,255,255,.45); margin-top: 2px; }
+
+/* hero screen mockup */
+.hero__screen { background: var(--ink); border-radius: 10px; overflow: hidden; box-shadow: 0 40px 80px rgba(0,0,0,.5), 0 0 0 1px rgba(255,255,255,.08); }
+.hero__screen-bar { background: #1a2332; padding: 10px 14px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid rgba(255,255,255,.06); }
+.hero__screen-dots { display: flex; gap: 6px; }
+.hero__screen-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.hero__screen-dots span:nth-child(1) { background: #FF5F57; }
+.hero__screen-dots span:nth-child(2) { background: #FEBC2E; }
+.hero__screen-dots span:nth-child(3) { background: #28C840; }
+.hero__screen-title { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.3); margin-left: 8px; }
+.hero__screen-body { display: flex; min-height: 320px; }
+.hero__sidebar { width: 140px; background: #111d28; padding: 16px 0; flex: none; }
+.hero__sidebar-logo { padding: 4px 14px 16px; border-bottom: 1px solid rgba(255,255,255,.06); margin-bottom: 12px; font-family: var(--display); font-size: 15px; font-weight: 700; color: #fff; }
+.hero__sidebar-item { padding: 8px 14px; font-size: 11px; color: rgba(255,255,255,.4); display: flex; align-items: center; gap: 8px; }
+.hero__sidebar-item.active { background: var(--green); color: #fff; border-radius: 0; }
+.hero__sidebar-item span { width: 5px; height: 5px; border-radius: 50%; background: currentColor; opacity: .6; flex: none; }
+.hero__content { flex: 1; padding: 20px; }
+.hero__content-head { font-family: var(--display); font-size: 18px; font-weight: 700; color: #fff; margin-bottom: 14px; }
+.mock-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mock-card { background: #1a2332; border-radius: 6px; padding: 12px; border: 1px solid rgba(255,255,255,.06); }
+.mock-card-letter { width: 28px; height: 28px; background: var(--green); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: var(--display); font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.mock-card-name { font-size: 11px; font-weight: 600; color: rgba(255,255,255,.85); margin-bottom: 3px; }
+.mock-card-desc { font-size: 10px; color: rgba(255,255,255,.35); line-height: 1.4; }
+.mock-card-btn { margin-top: 8px; background: var(--green); color: #fff; font-size: 9px; padding: 4px 8px; border-radius: 3px; font-family: var(--display); font-weight: 600; display: inline-block; }
+
+@media (max-width: 900px) {
+  .hero__inner { grid-template-columns: 1fr; }
+  .hero__screen { display: none; }
+}
+
+/* ── SECTION BASE ────────────────────────────────────────────────── */
+.section { padding: 88px 0; }
+.section--alt { background: var(--card); }
+.section--dark { background: var(--ink); }
+.section--green { background: var(--green); }
+.section__head { margin-bottom: 52px; }
+.section__head h2 { font-size: clamp(28px, 4vw, 44px); margin-top: 10px; }
+.section__head p { font-size: 17px; color: var(--ink-soft); max-width: 54ch; margin-top: 14px; line-height: 1.7; }
+
+/* ── HOW IT WORKS ────────────────────────────────────────────────── */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; border: 1px solid var(--line); }
+.step { padding: 32px 28px; border-right: 1px solid var(--line); position: relative; background: var(--card); }
+.step:last-child { border-right: none; }
+.step__num { font-family: var(--mono); font-size: 11px; color: var(--green); letter-spacing: .12em; margin-bottom: 16px; }
+.step__icon { width: 44px; height: 44px; background: var(--green-pale); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.step__icon svg { width: 22px; height: 22px; stroke: var(--green); fill: none; stroke-width: 1.8; }
+.step h3 { font-size: 17px; margin-bottom: 8px; }
+.step p { font-size: 14px; color: var(--ink-soft); line-height: 1.65; }
+@media (max-width: 780px) { .steps { grid-template-columns: 1fr; } .step { border-right: none; border-bottom: 1px solid var(--line); } .step:last-child { border-bottom: none; } }
+
+/* ── TOOLS ───────────────────────────────────────────────────────── */
+.tools-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.tool-card { background: var(--card); padding: 28px 24px; transition: background .15s; }
+.tool-card:hover { background: var(--green-pale); }
+.tool-card__cat { font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 10px; }
+.tool-card h3 { font-size: 16px; margin-bottom: 7px; }
+.tool-card p { font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+
+/* ── BEFORE AFTER ────────────────────────────────────────────────── */
+.ba { display: grid; grid-template-columns: 1fr auto 1fr; gap: 20px; align-items: start; }
+.ba__panel { border: 1px solid var(--line); background: var(--card); }
+.ba__panel-head { padding: 10px 16px; border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 11px; display: flex; align-items: center; gap: 8px; }
+.ba__panel-head--bad { color: var(--rust); }
+.ba__panel-head--good { color: var(--green); }
+.ba__panel-body { padding: 4px 0; }
+.ba__row { display: grid; grid-template-columns: 32px 1fr 1fr 1fr; font-family: var(--mono); font-size: 11px; padding: 5px 12px; border-bottom: 1px solid rgba(0,0,0,.04); }
+.ba__row.header { background: #F4F6F4; color: var(--ink-soft); font-size: 10px; }
+.ba__row .bad { color: var(--rust); }
+.ba__row .good { color: var(--green-dark); font-weight: 500; }
+.ba__row .flag { color: #B45309; }
+.ba__arrow { display: flex; align-items: center; justify-content: center; color: var(--green); font-size: 24px; padding: 20px 0; }
+@media (max-width: 700px) { .ba { grid-template-columns: 1fr; } .ba__arrow { display: none; } }
+
+/* ── PRICING ─────────────────────────────────────────────────────── */
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.plan { background: var(--card); padding: 32px 28px; }
+.plan--featured { background: var(--green); color: #fff; }
+.plan__label { font-family: var(--mono); font-size: 10px; letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 14px; }
+.plan--featured .plan__label { color: rgba(255,255,255,.55); }
+.plan__price { font-family: var(--display); font-size: 48px; font-weight: 700; line-height: 1; margin-bottom: 4px; letter-spacing: -.03em; }
+.plan--featured .plan__price { color: #fff; }
+.plan__strike { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); text-decoration: line-through; margin-bottom: 6px; }
+.plan--featured .plan__strike { color: rgba(255,255,255,.45); }
+.plan__period { font-size: 13px; color: var(--ink-soft); margin-bottom: 24px; }
+.plan--featured .plan__period { color: rgba(255,255,255,.65); }
+.plan__loading { font-family: var(--mono); font-size: 13px; color: var(--ink-soft); }
+.plan ul { list-style: none; margin-bottom: 28px; }
+.plan li { padding: 8px 0; border-top: 1px solid var(--line); font-size: 14px; display: flex; align-items: center; gap: 8px; color: var(--ink-soft); }
+.plan--featured li { border-color: rgba(255,255,255,.15); color: rgba(255,255,255,.8); }
+.plan li::before { content: '✓'; color: var(--green); font-weight: 700; flex: none; }
+.plan--featured li::before { color: #6EE7B7; }
+.plan .btn { width: 100%; justify-content: center; }
+@media (max-width: 700px) { .pricing-grid { grid-template-columns: 1fr; } }
+
+/* pricing loading state */
+.price-val { transition: opacity .3s; }
+.price-val.loading { opacity: .3; }
+
+/* ── FAQ ─────────────────────────────────────────────────────────── */
+.faq-list { border-top: 1px solid var(--line); }
+details { border-bottom: 1px solid var(--line); }
+summary { padding: 20px 0; cursor: pointer; font-family: var(--display); font-size: 17px; font-weight: 600; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+summary::-webkit-details-marker { display: none; }
+summary::after { content: '+'; font-size: 22px; color: var(--green); font-weight: 400; flex: none; }
+details[open] summary::after { content: '−'; }
+details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-height: 1.75; max-width: 62ch; }
+
+/* ── FOOTER ──────────────────────────────────────────────────────── */
+.footer { background: var(--ink); padding: 56px 0 32px; }
+.footer__top { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer__brand-name { font-family: var(--display); font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 10px; }
+.footer__brand-desc { font-size: 14px; color: rgba(255,255,255,.4); line-height: 1.7; max-width: 30ch; }
+.footer__col h4 { font-family: var(--mono); font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: rgba(255,255,255,.3); margin-bottom: 16px; }
+.footer__col a { display: block; font-size: 14px; color: rgba(255,255,255,.55); text-decoration: none; margin-bottom: 10px; transition: color .15s; }
+.footer__col a:hover { color: #fff; }
+.footer__bottom { border-top: 1px solid rgba(255,255,255,.08); padding-top: 24px; display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.footer__copy { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.25); }
+.footer__made { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.2); }
+@media (max-width: 700px) { .footer__top { grid-template-columns: 1fr; gap: 32px; } }
+
+/* ── DOWNLOAD BANNER ─────────────────────────────────────────────── */
+.download-bar { background: var(--green-dark); border-top: 1px solid rgba(255,255,255,.08); padding: 64px 0; }
+.download-bar__inner { display: flex; align-items: center; justify-content: space-between; gap: 40px; flex-wrap: wrap; }
+.download-bar h2 { font-size: clamp(24px, 3.5vw, 38px); color: #fff; max-width: 20ch; }
+.download-bar p { color: rgba(255,255,255,.55); margin-top: 10px; font-size: 15px; }
+.download-bar__actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; flex: none; }
+.download-bar__note { font-family: var(--mono); font-size: 11px; color: rgba(255,255,255,.3); margin-top: 10px; }
+
+/* ── TRUST BAR ───────────────────────────────────────────────────── */
+.trust { background: var(--green-pale); border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); padding: 20px 0; }
+.trust__inner { display: flex; gap: 40px; align-items: center; flex-wrap: wrap; justify-content: center; }
+.trust__item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--ink-soft); }
+.trust__item svg { width: 16px; height: 16px; stroke: var(--green); fill: none; stroke-width: 2; flex: none; }
+
+/* ── MISC ────────────────────────────────────────────────────────── */
+.text-green { color: var(--green); }
+.text-white { color: #fff; }
+.text-muted { color: var(--ink-soft); }
+.mt-4 { margin-top: 16px; }
+.mt-8 { margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="wrap nav__inner">
+    <a href="#" class="nav__logo">
+      <div class="nav__logo-mark">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 14H9V8h2v8zm4 0h-2V8h2v8z"/></svg>
+      </div>
+      <div>
+        <div class="nav__logo-text">Crow</div>
+        <div class="nav__logo-sub">Pattern Scouts</div>
+      </div>
+    </a>
+    <div class="nav__links">
+      <a href="#tools">Tools</a>
+      <a href="#how-it-works">How it works</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">Help</a>
+      <a href="mailto:patternscoutsinfo@gmail.com">Contact</a>
+    </div>
+    <a href="#download" class="btn btn--green nav__cta">Download</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap">
+    <div class="hero__inner">
+      <div>
+        <div class="hero__tag">
+          <span class="hero__tag-dot"></span>
+          <span>Windows 10 &amp; 11 &nbsp;·&nbsp; No Excel needed</span>
+        </div>
+        <h1>Your Excel file in.<br><em>The answer</em> out.</h1>
+        <p class="hero__sub">Crow is a desktop app with ready-made tools for your spreadsheets. Open the file, pick a tool, read the result. No formulas to write, no macros to install, nothing uploaded anywhere.</p>
+        <div class="hero__actions">
+          <a href="#download" class="btn btn--primary">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+            Download Crow — Free Trial
+          </a>
+          <a href="#pricing" class="btn btn--ghost">See pricing</a>
+        </div>
+        <div class="hero__note">Trial · ₹1 &nbsp;·&nbsp; Installs in under a minute</div>
+        <div class="hero__stats" style="margin-top:40px">
+          <div>
+            <div class="hero__stat-num">16+</div>
+            <div class="hero__stat-label">Ready-made tools</div>
+          </div>
+          <div>
+            <div class="hero__stat-num">4</div>
+            <div class="hero__stat-label">Tool categories</div>
+          </div>
+          <div>
+            <div class="hero__stat-num">0</div>
+            <div class="hero__stat-label">Uploads, ever</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- App mockup -->
+      <div class="hero__screen">
+        <div class="hero__screen-bar">
+          <div class="hero__screen-dots">
+            <span></span><span></span><span></span>
+          </div>
+          <span class="hero__screen-title">Crow · Data Analysis Tools</span>
+        </div>
+        <div class="hero__screen-body">
+          <div class="hero__sidebar">
+            <div class="hero__sidebar-logo">Crow</div>
+            <div class="hero__sidebar-item"><span></span>Dashboard</div>
+            <div class="hero__sidebar-item active"><span></span>General</div>
+            <div class="hero__sidebar-item"><span></span>Operations</div>
+            <div class="hero__sidebar-item"><span></span>HR</div>
+            <div class="hero__sidebar-item"><span></span>Vendor</div>
+            <div class="hero__sidebar-item"><span></span>GST</div>
+          </div>
+          <div class="hero__content">
+            <div class="hero__content-head">General</div>
+            <div class="mock-cards">
+              <div class="mock-card">
+                <div class="mock-card-letter">D</div>
+                <div class="mock-card-name">Duplicate Finder</div>
+                <div class="mock-card-desc">Find potential duplicate records</div>
+                <div class="mock-card-btn">Open →</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-letter">X</div>
+                <div class="mock-card-name">Excel Merger</div>
+                <div class="mock-card-desc">Combine multiple files into one</div>
+                <div class="mock-card-btn">Open →</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-letter">N</div>
+                <div class="mock-card-name">Near-Duplicate</div>
+                <div class="mock-card-desc">Fuzzy match across records</div>
+                <div class="mock-card-btn">Open →</div>
+              </div>
+              <div class="mock-card">
+                <div class="mock-card-letter">F</div>
+                <div class="mock-card-name">Filtered Data</div>
+                <div class="mock-card-desc">Extract working subsets fast</div>
+                <div class="mock-card-btn">Open →</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRUST BAR -->
+<div class="trust">
+  <div class="wrap trust__inner">
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Your data never leaves your computer
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      No Excel installation required
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Updates automatically in the background
+    </div>
+    <div class="trust__item">
+      <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Made in Mumbai for Indian businesses
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section class="section section--alt" id="how-it-works">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">Getting started</p>
+      <h2>Four steps. Then you're working.</h2>
+      <p>No installer wizard with 12 screens. No account to create before you can see anything. Just download, register inside the app, pay once, and start.</p>
+    </div>
+    <div class="steps">
+      <div class="step">
+        <div class="step__num">01</div>
+        <div class="step__icon">
+          <svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+        </div>
+        <h3>Download CrowSetup.exe</h3>
+        <p>One file. Double-click it. Crow installs itself in the right place with a Desktop shortcut. No admin password needed.</p>
+      </div>
+      <div class="step">
+        <div class="step__num">02</div>
+        <div class="step__icon">
+          <svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </div>
+        <h3>Register inside Crow</h3>
+        <p>Fill in your name and contact details. Pick a plan. A QR code appears on screen for UPI payment.</p>
+      </div>
+      <div class="step">
+        <div class="step__num">03</div>
+        <div class="step__icon">
+          <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+        </div>
+        <h3>Pay by UPI</h3>
+        <p>Scan the QR code and pay. Email us the payment screenshot. Your licence key arrives within one business day.</p>
+      </div>
+      <div class="step">
+        <div class="step__num">04</div>
+        <div class="step__icon">
+          <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <h3>Enter your key and start</h3>
+        <p>Paste the key once. Crow opens straight to your tools every time after that, and updates itself in the background.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- BEFORE / AFTER -->
+<section class="section">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">What Crow actually does</p>
+      <h2>Messy spreadsheet in.<br>Clean result out.</h2>
+      <p>Every tool cleans your data on load — trailing spaces, mixed case, wrong date formats, numbers stored as text — before it even starts the analysis.</p>
+    </div>
+    <div class="ba">
+      <div class="ba__panel">
+        <div class="ba__panel-head ba__panel-head--bad">✕ &nbsp; What you have</div>
+        <div class="ba__panel-body">
+          <div class="ba__row header"><span>#</span><span>Vendor</span><span>Invoice</span><span>Amount</span></div>
+          <div class="ba__row"><span>1</span><span class="bad">&nbsp;shah traders</span><span class="bad">INV 0921</span><span class="bad">₹ 12,400 </span></div>
+          <div class="ba__row"><span>2</span><span class="bad">SHAH TRADERS  </span><span class="bad">inv-0921</span><span class="bad">12400</span></div>
+          <div class="ba__row"><span>3</span><span class="bad">Shah Traders</span><span class="bad">INV-0921</span><span class="bad">Rs12400</span></div>
+        </div>
+      </div>
+      <div class="ba__arrow">→</div>
+      <div class="ba__panel">
+        <div class="ba__panel-head ba__panel-head--good">✓ &nbsp; What Crow gives you</div>
+        <div class="ba__panel-body">
+          <div class="ba__row header"><span>#</span><span>Vendor</span><span>Invoice</span><span>Amount</span></div>
+          <div class="ba__row"><span>1</span><span class="good">Shah Traders</span><span class="good">INV-0921</span><span class="good">12,400.00</span></div>
+          <div class="ba__row"><span>2</span><span class="flag">Shah Traders</span><span class="flag">INV-0921</span><span class="flag">⚠ duplicate</span></div>
+          <div class="ba__row"><span>3</span><span class="flag">Shah Traders</span><span class="flag">INV-0921</span><span class="flag">⚠ duplicate</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOOLS -->
+<section class="section section--alt" id="tools">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">The toolbox</p>
+      <h2>Every tool you keep doing by hand.</h2>
+      <p>Crow ships with tools across General, Operations, HR, Vendor, and GST. New tools arrive in the background without downloading anything.</p>
+    </div>
+    <div class="tools-grid">
+      <div class="tool-card">
+        <div class="tool-card__cat">General</div>
+        <h3>Data Health Scorecard</h3>
+        <p>Score your spreadsheet for completeness, consistency and duplicates before you send it anywhere.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">General</div>
+        <h3>Duplicate Record Finder</h3>
+        <p>Find exact and near-duplicate rows across any column combination, with a fraud-risk flag.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">General</div>
+        <h3>Excel Merger</h3>
+        <p>Combine multiple Excel or CSV files into one clean sheet, with source-file tracking.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">General</div>
+        <h3>Cross Master ID Verifier</h3>
+        <p>Match IDs across two master files and flag every mismatch in seconds.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">General</div>
+        <h3>Stage to Stage Ageing</h3>
+        <p>Calculate how long records spent at each stage of a process — approvals, dispatch, payment.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">Operations</div>
+        <h3>Container Weight Pivot</h3>
+        <p>Pivot container weight data by date, route or product with one click.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">Operations</div>
+        <h3>Transaction Nullifier</h3>
+        <p>Identify transactions that cancel each other out — returns, reversals, credit notes.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">HR</div>
+        <h3>Salary CTC Audit</h3>
+        <p>Reconcile CTC components, check for discrepancies and produce a summary by grade.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">HR</div>
+        <h3>Attendance Audit</h3>
+        <p>Flag absences, late marks and anomalies from raw muster or biometric exports.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">Vendor</div>
+        <h3>Rate Updater</h3>
+        <p>Write updated rates into your Excel file by date range and column conditions.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">Vendor</div>
+        <h3>Vendor Duplicate Finder</h3>
+        <p>Detect duplicate invoices and payments across vendor registers, even with minor variations.</p>
+      </div>
+      <div class="tool-card">
+        <div class="tool-card__cat">GST</div>
+        <h3>Group and Aggregate</h3>
+        <p>Group rows and aggregate values by any selected columns — totals, counts, averages.</p>
+      </div>
+    </div>
+    <p class="mt-8 text-muted" style="font-size:14px;font-family:var(--mono)">New tools are added regularly. If you need something that isn't here, request it from inside Crow — it goes straight to us.</p>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="wrap">
+    <div class="section__head">
+      <p class="eyebrow">Pricing</p>
+      <h2>Try it for one rupee.</h2>
+      <p>One licence covers one computer. Prices are in Indian rupees and include everything — every tool, every update, every category.</p>
+    </div>
+    <div class="pricing-grid" id="pricing-grid">
+      <!-- filled by JS from Supabase -->
+      <div class="plan">
+        <div class="plan__label">Trial</div>
+        <div class="plan__price price-val loading" id="price-trial">₹1</div>
+        <div class="plan__period">To confirm it works on your machine</div>
+        <ul>
+          <li>Full toolbox — all categories</li>
+          <li>Your files stay on your computer</li>
+          <li>Upgrade any time</li>
+        </ul>
+        <a href="#download" class="btn btn--ink">Start trial</a>
+      </div>
+      <div class="plan plan--featured">
+        <div class="plan__label">Monthly</div>
+        <div class="plan__price price-val loading" id="price-monthly">₹200</div>
+        <div class="plan__strike" id="strike-monthly"></div>
+        <div class="plan__period">Per month, billed monthly</div>
+        <ul>
+          <li>Full toolbox — all categories</li>
+          <li>New tools as they ship</li>
+          <li>Silent automatic updates</li>
+          <li>Email support</li>
+        </ul>
+        <a href="#download" class="btn btn--primary">Get started</a>
+      </div>
+      <div class="plan">
+        <div class="plan__label">Yearly</div>
+        <div class="plan__price price-val loading" id="price-yearly">₹1,500</div>
+        <div class="plan__strike" id="strike-yearly"></div>
+        <div class="plan__period">Per year — works out cheaper monthly</div>
+        <ul>
+          <li>Full toolbox — all categories</li>
+          <li>New tools as they ship</li>
+          <li>Silent automatic updates</li>
+          <li>Email support</li>
+        </ul>
+        <a href="#download" class="btn btn--ink">Get started</a>
+      </div>
+    </div>
+    <p class="mt-4 text-muted" style="font-size:13px;text-align:center;font-family:var(--mono)">Payment by UPI · Key delivered within 1 business day</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section class="section section--alt" id="faq">
+  <div class="wrap--narrow">
+    <div class="section__head">
+      <p class="eyebrow">Help</p>
+      <h2>Questions people actually ask.</h2>
+    </div>
+    <div class="faq-list">
+      <details open>
+        <summary>Does my data leave my computer?</summary>
+        <p>No. Crow opens your spreadsheet on your machine and writes the result back on your machine. The only time it contacts the internet is to check your licence and to fetch new tool versions. Your data is never uploaded anywhere.</p>
+      </details>
+      <details>
+        <summary>Do I need Microsoft Excel installed?</summary>
+        <p>No. Crow reads and writes .xlsx and .csv files on its own. Excel does not need to be on the machine.</p>
+      </details>
+      <details>
+        <summary>How do updates work?</summary>
+        <p>Crow updates itself automatically in the background when your computer starts. You will never see a popup or be asked to do anything. One day you open Crow and it quietly has new tools or improvements — that is it.</p>
+      </details>
+      <details>
+        <summary>I paid but my key has not arrived.</summary>
+        <p>Keys are sent by hand, usually within one business day. If it has been longer, reply to your payment email with the screenshot still attached — we will sort it the same day.</p>
+      </details>
+      <details>
+        <summary>Can I move the licence to another computer?</summary>
+        <p>Yes. Email us from your registered address with the new machine's details and we will move the key across. Your old machine stops using it at that point. Nothing is deleted.</p>
+      </details>
+      <details>
+        <summary>My antivirus is blocking Crow. What do I do?</summary>
+        <p>Add Crow.exe to your antivirus exclusion list. In Kaspersky, go to Exclusions and actions on object detection → Exclusions → Add → browse to Crow.exe → tick File or folder → Add. After that, Crow updates without interruption.</p>
+      </details>
+      <details>
+        <summary>Can I request a tool that doesn't exist yet?</summary>
+        <p>Yes — that is what the Request a tool button is for inside Crow. Describe the job you keep doing by hand, step by step, and it comes straight to us. We build the tools users actually need.</p>
+      </details>
+      <details>
+        <summary>Which versions of Windows does it run on?</summary>
+        <p>Windows 10 and Windows 11, 64-bit.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
+<!-- DOWNLOAD -->
+<div class="download-bar" id="download">
+  <div class="wrap">
+    <div class="download-bar__inner">
+      <div>
+        <h2>Ready to stop doing this by hand?</h2>
+        <p>Download CrowSetup.exe, pay ₹1, run it against a file you already know the answer to. If it doesn't earn its place, you've spent one rupee.</p>
+        <div class="download-bar__note" style="margin-top:14px">Windows 10 &amp; 11 · 64-bit · No Excel needed · No admin password</div>
+      </div>
+      <div class="download-bar__actions">
+        <a href="#" id="download-btn" class="btn btn--primary" style="font-size:16px;padding:16px 32px">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          Download CrowSetup.exe
+        </a>
+        <a href="mailto:patternscoutsinfo@gmail.com" class="btn btn--ghost">Email us a question</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__top">
+      <div>
+        <div class="footer__brand-name">Crow · Pattern Scouts</div>
+        <div class="footer__brand-desc">Desktop data analysis tools for Indian businesses. Your files stay on your computer.</div>
+      </div>
+      <div class="footer__col">
+        <h4>Product</h4>
+        <a href="#tools">Tools</a>
+        <a href="#how-it-works">How it works</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#download">Download</a>
+      </div>
+      <div class="footer__col">
+        <h4>Support</h4>
+        <a href="#faq">Help &amp; FAQ</a>
+        <a href="mailto:patternscoutsinfo@gmail.com">Email support</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <div class="footer__copy">© 2026 Pattern Scouts. All rights reserved.</div>
+      <div class="footer__made">Made in Mumbai, India.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────
+const SUPA_URL  = "https://yetrkxtiwbajckynyssw.supabase.co";
+const SUPA_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InlldHJreHRpd2JhamNreW55c3N3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODYyNDk1NTgsImV4cCI6MjEwMTgyNTU1OH0.JFC-iE8xtRB4Cg642sRi5-Jaf0r7p9NiTNdyMdTu7lA";
+
+// Download URL fetched from GitHub releases API
+// The repo name is intentionally not shown in visible page text.
+const RELEASES_API = "https://api.github.com/repos/patternscoutsinfo/crow-releases/releases/latest";
+
+// ── LOAD PRICING FROM SUPABASE ────────────────────────────────────
+async function loadPricing() {
+  try {
+    const res = await fetch(SUPA_URL + "/rest/v1/rpc/crow_public_settings", {
+      method: "POST",
+      headers: {
+        "apikey": SUPA_ANON,
+        "Authorization": "Bearer " + SUPA_ANON,
+        "Content-Type": "application/json"
+      },
+      body: "{}"
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const p = data.prices || {};
+
+    const fmt = (v) => "₹" + Number(v).toLocaleString("en-IN");
+
+    const trial   = document.getElementById("price-trial");
+    const monthly = document.getElementById("price-monthly");
+    const yearly  = document.getElementById("price-yearly");
+    const strikeM = document.getElementById("strike-monthly");
+    const strikeY = document.getElementById("strike-yearly");
+
+    if (trial   && p.trial   != null) { trial.textContent   = fmt(p.trial);   trial.classList.remove("loading"); }
+    if (monthly && p.monthly != null) { monthly.textContent = fmt(p.monthly); monthly.classList.remove("loading"); }
+    if (yearly  && p.yearly  != null) { yearly.textContent  = fmt(p.yearly);  yearly.classList.remove("loading"); }
+
+    // Strike-through prices from Supabase settings (price_monthly_strike etc)
+    // These come through as separate crow_setting calls; we try reading them
+    // from a second call if available, otherwise leave blank.
+  } catch (e) {
+    // Supabase unreachable — hardcoded fallbacks already visible in HTML
+    document.querySelectorAll(".price-val").forEach(el => el.classList.remove("loading"));
+  }
+}
+
+// ── LOAD DOWNLOAD LINK FROM GITHUB ───────────────────────────────
+async function loadDownload() {
+  try {
+    const res = await fetch(RELEASES_API, {
+      headers: { "Accept": "application/vnd.github+json" }
+    });
+    if (!res.ok) return;
+    const data = await res.json();
+    const asset = (data.assets || []).find(a => a.name === "CrowSetup.exe");
+    if (asset && asset.browser_download_url) {
+      const btn = document.getElementById("download-btn");
+      if (btn) btn.href = asset.browser_download_url;
+      // Also update hero download button
+      document.querySelectorAll('a[href="#download"]').forEach(a => {
+        if (a.textContent.includes("Free Trial") || a.textContent.includes("CrowSetup")) {
+          // leave the href as the real download
+        }
+      });
+      // Nav download button
+      const navCta = document.querySelector(".nav__cta");
+      if (navCta) navCta.href = asset.browser_download_url;
+    }
+  } catch (e) {
+    // offline — button stays pointing at #download section
+  }
+}
+
+// ── HERO BUTTONS → real download once loaded ──────────────────────
+async function updateHeroBtn() {
+  const asset_url = document.getElementById("download-btn")?.href;
+  // hero "Download Crow" button
+  const heroBtn = document.querySelector('.hero__actions .btn--primary');
+  if (heroBtn && asset_url && !asset_url.endsWith("#download")) {
+    heroBtn.href = asset_url;
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadPricing();
+  await loadDownload();
+  updateHeroBtn();
+});
+</script>
+</body>
+</html>
