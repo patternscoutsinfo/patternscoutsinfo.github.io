@@ -230,6 +230,65 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
 .text-muted { color: var(--ink-soft); }
 .mt-4 { margin-top: 16px; }
 .mt-8 { margin-top: 32px; }
+
+/* ── CONTACT MODAL ───────────────────────────────────────────────── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,.55);
+  z-index: 999;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.open { display: flex; }
+.modal {
+  background: var(--card);
+  width: 100%;
+  max-width: 540px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow: 0 32px 80px rgba(0,0,0,.35);
+  animation: modal-in .2s ease;
+}
+@keyframes modal-in { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:none; } }
+.modal__head { background: var(--green); padding: 28px 32px 24px; }
+.modal__head h3 { font-family: var(--display); font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.modal__head p { font-size: 14px; color: rgba(255,255,255,.65); }
+.modal__close { position: absolute; top: 16px; right: 20px; background: none; border: none; color: rgba(255,255,255,.7); font-size: 24px; cursor: pointer; line-height: 1; padding: 4px 8px; }
+.modal__close:hover { color: #fff; }
+.modal__body { padding: 32px; }
+.form-group { margin-bottom: 20px; }
+.form-group label { display: block; font-family: var(--mono); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--ink-soft); margin-bottom: 7px; }
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  font-family: var(--sans);
+  font-size: 15px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  padding: 11px 14px;
+  outline: none;
+  border-radius: 2px;
+  transition: border-color .15s;
+}
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus { border-color: var(--green); background: #fff; }
+.form-group textarea { resize: vertical; min-height: 110px; line-height: 1.6; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+@media (max-width: 480px) { .form-row { grid-template-columns: 1fr; } }
+.form-submit { width: 100%; padding: 14px; font-family: var(--display); font-size: 16px; font-weight: 700; background: var(--green); color: #fff; border: none; cursor: pointer; border-radius: 2px; transition: background .15s; margin-top: 8px; }
+.form-submit:hover { background: var(--green-mid); }
+.form-submit:disabled { opacity: .6; cursor: not-allowed; }
+.form-status { margin-top: 14px; font-size: 14px; text-align: center; min-height: 20px; }
+.form-status.success { color: var(--green); font-weight: 600; }
+.form-status.error { color: var(--rust); }
 </style>
 </head>
 <body>
@@ -251,7 +310,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
       <a href="#how-it-works">How it works</a>
       <a href="#pricing">Pricing</a>
       <a href="#faq">Help</a>
-      <a href="mailto:patternscoutsinfo@gmail.com">Contact</a>
+      <a href="#" onclick="openModal();return false;">Contact</a>
     </div>
     <a href="#download" class="btn btn--green nav__cta">Download</a>
   </div>
@@ -628,7 +687,7 @@ details p { padding: 0 0 20px; color: var(--ink-soft); font-size: 15px; line-hei
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
           Download CrowSetup.exe
         </a>
-        <a href="mailto:patternscoutsinfo@gmail.com" class="btn btn--ghost">Email us a question</a>
+        <a href="#" onclick="openModal();return false;" class="btn btn--ghost">Email us a question</a>
       </div>
     </div>
   </div>
@@ -701,17 +760,25 @@ async function loadPricing() {
     if (yearly  && p.yearly  != null) { yearly.textContent  = fmt(p.yearly);  yearly.classList.remove("loading"); }
 
     // Strike-through + savings badge
+    // Falls back to Supabase strike values, then to hardcoded fallback
     function renderStrike(el, strikeVal, actualVal) {
-      if (!el || !strikeVal || Number(strikeVal) <= 0) return;
       const strike = Number(strikeVal);
       const actual = Number(actualVal) || 0;
+      if (!el || !strike || strike <= 0 || strike <= actual) return;
       const saving = actual > 0 ? Math.round((1 - actual/strike)*100) : 0;
       el.innerHTML =
         '<span class="plan__strike-was">' + fmt(strike) + '</span>' +
         (saving > 0 ? '<span class="plan__strike-save">Save ' + saving + '%</span>' : '');
     }
-    renderStrike(strikeM, p.monthly_strike, p.monthly);
-    renderStrike(strikeY, p.yearly_strike,  p.yearly);
+
+    // Try Supabase value first, fall back to known values from settings table
+    const mStrike = (p.monthly_strike && Number(p.monthly_strike) > 0)
+                    ? p.monthly_strike : "1500";
+    const yStrike = (p.yearly_strike  && Number(p.yearly_strike)  > 0)
+                    ? p.yearly_strike  : "15000";
+
+    renderStrike(strikeM, mStrike, p.monthly);
+    renderStrike(strikeY, yStrike, p.yearly);
 
   } catch (e) {
     // Supabase unreachable — hardcoded fallbacks already visible in HTML
@@ -762,6 +829,125 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadDownload();
   updateHeroBtn();
 });
+
+// ── CONTACT MODAL ─────────────────────────────────────────────────
+function openModal() {
+  document.getElementById("contact-modal").classList.add("open");
+  document.body.style.overflow = "hidden";
+  setTimeout(() => document.getElementById("cf-name").focus(), 200);
+}
+function closeModal() {
+  document.getElementById("contact-modal").classList.remove("open");
+  document.body.style.overflow = "";
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape") closeModal(); });
+
+async function submitContact() {
+  const name    = document.getElementById("cf-name").value.trim();
+  const mobile  = document.getElementById("cf-mobile").value.trim();
+  const email   = document.getElementById("cf-email").value.trim();
+  const topic   = document.getElementById("cf-topic").value;
+  const message = document.getElementById("cf-message").value.trim();
+  const status  = document.getElementById("cf-status");
+  const btn     = document.getElementById("cf-submit");
+
+  if (!name || !mobile || !email || !message) {
+    status.textContent = "Please fill in all required fields.";
+    status.className = "form-status error";
+    return;
+  }
+  if (!/^[^@]+@[^@]+\.[^@]+$/.test(email)) {
+    status.textContent = "Please enter a valid email address.";
+    status.className = "form-status error";
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = "Sending…";
+  status.textContent = "";
+  status.className = "form-status";
+
+  // Post directly to Supabase — no email service, no verification needed
+  try {
+    const res = await fetch(SUPA_URL + "/rest/v1/rpc/crow_website_enquiry", {
+      method: "POST",
+      headers: {
+        "apikey": SUPA_ANON,
+        "Authorization": "Bearer " + SUPA_ANON,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        p_name: name, p_mobile: mobile, p_email: email,
+        p_topic: topic, p_message: message
+      })
+    });
+    const data = await res.json();
+    if (data && data.ok) {
+      status.textContent = "Thank you! We will get back to you within one business day.";
+      status.className = "form-status success";
+      btn.textContent = "Sent ✓";
+      ["cf-name","cf-mobile","cf-email","cf-message"].forEach(id => {
+        document.getElementById(id).value = "";
+      });
+      document.getElementById("cf-topic").selectedIndex = 0;
+      setTimeout(closeModal, 3000);
+      return;
+    } else {
+      throw new Error((data && data.message) || "Could not send.");
+    }
+  } catch(e) {
+    status.textContent = "Could not send right now. Please email us directly at patternscoutsinfo@gmail.com";
+    status.className = "form-status error";
+    btn.disabled = false;
+    btn.textContent = "Send message";
+  }
+}
+
 </script>
+
+<!-- CONTACT MODAL -->
+<div class="modal-overlay" id="contact-modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal__head">
+      <button class="modal__close" onclick="closeModal()" aria-label="Close">&times;</button>
+      <h3>Get in touch</h3>
+      <p>Tell us what you need. We usually reply within one business day.</p>
+    </div>
+    <div class="modal__body">
+      <div class="form-row">
+        <div class="form-group">
+          <label for="cf-name">Full name *</label>
+          <input type="text" id="cf-name" placeholder="Rahul Sharma" required>
+        </div>
+        <div class="form-group">
+          <label for="cf-mobile">Mobile number *</label>
+          <input type="tel" id="cf-mobile" placeholder="+91 98765 43210" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="cf-email">Email address *</label>
+        <input type="email" id="cf-email" placeholder="rahul@company.com" required>
+      </div>
+      <div class="form-group">
+        <label for="cf-topic">What is this about?</label>
+        <select id="cf-topic">
+          <option value="Product enquiry">Product enquiry</option>
+          <option value="Pricing & plans">Pricing &amp; plans</option>
+          <option value="Tool request">Tool request — I need something Crow doesn't have yet</option>
+          <option value="Technical support">Technical support</option>
+          <option value="Bulk / team licence">Bulk / team licence</option>
+          <option value="Other">Something else</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="cf-message">Your message *</label>
+        <textarea id="cf-message" placeholder="Describe what you are looking for, or what problem you are trying to solve. The more detail you give, the better we can help."></textarea>
+      </div>
+      <button class="form-submit" id="cf-submit" onclick="submitContact()">Send message</button>
+      <div class="form-status" id="cf-status"></div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
